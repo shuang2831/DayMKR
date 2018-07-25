@@ -6,7 +6,11 @@ import { types } from '../actions/rootActions';
 const initialState = {
   token: 'unknown',
   contacts: {},
-  userInfo: {},
+  fbInfo: {},
+  userInfo: {
+    messages: [],
+  },
+  dailyInfo: {},
 };
 
 // Function to handle actions and update the state of the store.
@@ -28,10 +32,20 @@ export default (state = initialState, action) => {
         ...state,
         contacts: action.payload,
       };
+    case types.UPDATE_FB_INFO:
+      return {
+        ...state,
+        fbInfo: action.payload,
+      };
     case types.UPDATE_USER_INFO:
       return {
         ...state,
         userInfo: action.payload,
+      };
+    case types.UPDATE_DAILY_INFO:
+      return {
+        ...state,
+        dailyInfo: action.payload,
       };
     default:
       return state;

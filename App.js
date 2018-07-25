@@ -104,7 +104,7 @@ class App extends Component {
       isLoggedIn = !!data;
       console.log(data);
       this.initUser(data.accessToken);
-      //this.props.dispatch(updateToken(data.accessToken));
+      this.props.dispatch(updateToken(data.accessToken));
     });
     this.state = {
       loggedIn: isLoggedIn,
@@ -125,7 +125,7 @@ class App extends Component {
     const responseInfoCallback = (error, result) => {
       if (error) {
       } else {
-        //this.props.dispatch(storeUser(result));
+        this.props.dispatch(storeUser(result));
       }
     };
 
@@ -149,7 +149,7 @@ class App extends Component {
     if (!this.state.loaded) {
       return <View />;
     } else {
-      return this.props.token === 'unknown' ? <RootStack /> : <RootStack />;
+      return this.props.token === 'unknown' ? <LoginScreen /> : <RootStack />;
     }
   }
 }

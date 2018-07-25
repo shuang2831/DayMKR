@@ -22,6 +22,8 @@ import {
 } from 'react-native';
 import { StackNavigator } from 'react-navigation';
 
+import TimeAgo from 'react-native-timeago';
+
 import { Header, Card, Button, Divider, Avatar } from 'react-native-elements';
 import { connect } from 'react-redux';
 import MakeDayModal from './MakeDayModal';
@@ -44,6 +46,7 @@ type Props = {};
 const mapStateToProps = state => ({
   token: state.token,
   contacts: state.contacts,
+  userInfo: state.userInfo,
 });
 
 class MyListItem extends PureComponent {
@@ -61,8 +64,8 @@ class MyListItem extends PureComponent {
           }}
         >
           <View>
-            <Text style={{ color: 'gray' }}>{this.props.recency}</Text>
-            <Text style={{ color: colors.primaryRed }}>{this.props.name}</Text>
+            <Text style={{ color: 'gray', fontSize: 10 }}><TimeAgo time={this.props.recency} /></Text>
+            <Text style={{ color: colors.primaryRed }}>{this.props.givenName}</Text>
             <Text style={{ color: 'gray', fontFamily: 'Lato' }}>{this.props.message}</Text>
           </View>
           <Avatar
@@ -71,9 +74,8 @@ class MyListItem extends PureComponent {
             onPress={() => console.log('Works!')}
             activeOpacity={0.7}
             source={{
-              uri:
-                'https://scontent-ort2-1.xx.fbcdn.net/v/t1.0-1/10525865_10103390617202827_7274473316466244806_n.jpg?_nc_cat=0&_nc_eui2=AeGOYAl2s36FtxUvYCAUGBWZPlJaFahboQRQnb5DsGaCGpuXcOvaY2jm8G_Tq2S3-LV4czUC1Vkyv9SLYMDHIV_MVV1pjU__3Itu7ItH9L13Fw&oh=4fd14f5fbd42e616fb5253ba62aed33f&oe=5BBD1015',
-            }}
+              uri: this.props.imagePath ? this.props.imagePath : 'http://www.astro.oma.be/wp-content/themes/porto-child/assets/img/user.png'
+                    }}
           />
         </TouchableOpacity>
         <Divider style={{ backgroundColor: 'lightgray' }} />
@@ -98,13 +100,28 @@ class HomeScreen extends Component<Props> {
   }
 
   componentDidMount() {
-    this.requestCameraPermission();
-    Contacts.getAll((err, contacts) => {
-      if (err) throw err;
-
-      //console.log(contacts);
-      this.props.dispatch(updateContacts(contacts));
-    });
+    if (Platform.OS == 'android') {
+      PermissionsAndroid.request(
+          PermissionsAndroid.PERMISSIONS.READ_CONTACTS,
+          {
+              'title': 'Contacts',
+              'message': 'Describing why I need to access contact information.'
+          }
+      )
+      .then(granted => {
+          if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+              Contacts.getAll((err, contacts) => {
+                this.props.dispatch(updateContacts(contacts));
+              });
+          }
+          else {
+              // Handle
+          }
+      })
+      .catch(err => {
+          console.log('PermissionsAndroid', err)
+      })
+  }
   }
 
   async requestCameraPermission() {
@@ -126,6 +143,7 @@ class HomeScreen extends Component<Props> {
       //console.warn(err);
     }
   }
+  
 
   openModal() {
     this.setState({ modalVisible: true });
@@ -165,15 +183,15 @@ class HomeScreen extends Component<Props> {
     return this.props.contacts[num];
   }
 
-  _keyExtractor = (item, index) => item.id;
+  _keyExtractor = (item, index) => item._id;
 
   _renderItem = ({ item }) => (
-    <MyListItem id={item.id} name={item.name} recency={item.recency} message={item.message} />
+    <MyListItem id={item._id} givenName={item.givenName} recency={item.Date} message={item.message} />
   );
 
   render() {
     return (
-      <View>
+      <View style={{position: 'absolute', height: '100%',}}>
         <Modal
           style={{ alignSelf: 'center', backgroundColor: 'rgba(255,255,255,0.5', color: 'red' }}
           visible={this.state.modalVisible}
@@ -210,7 +228,7 @@ class HomeScreen extends Component<Props> {
                 />
                 <Text style={[appStyles.yellowText, styles.statText]}>Days made to date</Text>
               </View>
-              <Text style={[appStyles.yellowText, styles.statText]}>176</Text>
+              <Text style={[appStyles.yellowText, styles.statText]}>{this.props.userInfo.totalDaysMade}</Text>
             </View>
             <Divider style={{ backgroundColor: colors.primaryYellow, opacity: 0.5 }} />
             <View style={styles.statline}>
@@ -221,7 +239,7 @@ class HomeScreen extends Component<Props> {
                 />
                 <Text style={[appStyles.yellowText, styles.statText]}>Current Streak</Text>
               </View>
-              <Text style={[appStyles.yellowText, styles.statText]}>23</Text>
+              <Text style={[appStyles.yellowText, styles.statText]}>{this.props.userInfo.streak}</Text>
             </View>
           </View>
         </ImageBackground>
@@ -245,64 +263,7 @@ class HomeScreen extends Component<Props> {
           <Text style={{ color: '#ffffff' }}> + </Text>
         </TouchableOpacity>
         <FlatList
-          data={[
-            {
-              key: 'a',
-              id: '0',
-              recency: '3 min ago',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '1',
-              recency: 'Yesterday',
-              name: 'Stan huang',
-              message: `You're the best app developer I know!`,
-            },
-            {
-              key: 'a',
-              id: '2',
-              recency: '3 min ago',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '3',
-              recency: '3 min ago',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '4',
-              recency: '3 min ago',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '5',
-              recency: '3',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '6',
-              recency: '3',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-            {
-              key: 'a',
-              id: '7',
-              recency: '3',
-              name: 'Justin Kraft',
-              message: 'Hey man, long time no see!',
-            },
-          ]}
+          data={this.props.userInfo.messages.slice().reverse()}
           extraData={this.state}
           keyExtractor={this._keyExtractor}
           renderItem={this._renderItem}
@@ -364,7 +325,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     right: 20,
-    top: '55%',
+    bottom: 20,
+ 
     backgroundColor: '#cb5141',
     borderRadius: 100,
     zIndex: 5,

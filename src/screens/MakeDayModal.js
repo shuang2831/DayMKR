@@ -5,6 +5,7 @@
  */
 
 import React, { Component } from 'react';
+import { bindActionCreators } from 'redux'
 import {
   Platform,
   StyleSheet,
@@ -33,11 +34,19 @@ import { Header, Card, Button, Avatar } from 'react-native-elements';
 
 import appStyles from '../styles/appStyles';
 
+import { storeUser, updateDaily, updateUser } from '../actions/rootActions';
+
 type Props = {};
 
 const mapStateToProps = state => ({
   token: state.token,
+  userInfo: state.userInfo
 });
+
+// const mapDispatchToProps = dispatch => ({
+//   updateUserInfo: id => dispatch(updateUserInfo(id)) // <-- manually dispatches
+// });
+
 
 class MakeDayModal extends Component<Props> {
   constructor(props) {
@@ -139,6 +148,7 @@ class MakeDayModal extends Component<Props> {
         this.setState({
           dayMade: true,
         });
+        this.props.dispatch(updateDaily(this.props.userInfo._id, this.state.text, this.state.currentContact.givenName, this.state.currentContact.thumbnailPath, updateUser(this.props.userInfo._id)))
       },
     );
   }
@@ -169,6 +179,7 @@ class MakeDayModal extends Component<Props> {
           } else {
             console.log('Messenge success');
             // success
+           // this.props.dispatcj()
             this.setState({
               dayMade: true,
             });

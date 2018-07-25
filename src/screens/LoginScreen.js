@@ -6,8 +6,11 @@
 
 import React, { Component } from 'react';
 import { AppRegistry, StyleSheet, Text, View, TouchableOpacity, alert } from 'react-native';
-import FBSDK, { LoginButton, LoginManager, ShareDialog } from 'react-native-fbsdk';
+import FBSDK, { LoginButton, LoginManager, ShareDialog, AccessToken } from 'react-native-fbsdk';
+import { connect } from 'react-redux';
 import myFace from '../images/myface.jpg';
+
+import { updateToken } from '../actions/rootActions';
 
 const shareLinkContent = {
   to: 100000064472630,
@@ -20,7 +23,12 @@ const shareLinkContent = {
   quote: 'Check out this link!',
 };
 
-export default class LoginScreen extends Component {
+const mapStateToProps = state => ({
+  token: state.token,
+  userInfo: state.userInfo,
+});
+
+class LoginScreen extends Component {
   constructor(props) {
     super(props);
     this._fbAuth = this._fbAuth.bind(this);
@@ -32,7 +40,11 @@ export default class LoginScreen extends Component {
         if (result.isCancelled) {
           alert('Login was cancelled');
         } else {
-          alert(`Login was successful with permissions: ${result.grantedPermissions.toString()}`);
+          // alert(`Login was successful with permissions: ${result.grantedPermissions.toString()}`);
+          console.log(result)
+          AccessToken.getCurrentAccessToken().then(data => {
+            this.props.dispatch(updateToken(data.accessToken));
+          });
         }
       },
       (error) => {
@@ -95,4 +107,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('LoginScreen', () => LoginScreen);
+export default connect(mapStateToProps)(LoginScreen);
